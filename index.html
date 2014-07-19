@@ -1,0 +1,44 @@
+<!doctype html>
+<html ng-app="AngularAlbum">
+<head>
+	<title>Angular Album</title>
+	<style type="text/css">
+	#map {
+    height:420px;
+    width:600px;float: left;
+	}
+	#target {
+    width:300px;
+	}
+	ul.nav{clear: both;float: left;padding:0;margin:0;}
+	ul.nav li{float:left;list-style:none;padding:5px;border:1px solid #ccc;margin:5px 8px 10px 0;}
+	.nav li.active{border: 5px solid red}
+.container.slider{clear:both;text-align:center;margin:0 auto;padding:5px;border:1px solid #ccc;}
+		#my-slider{width:45%;float: left;margin:0% 2% 2% 2%;}
+		.search-bo{position:relative;}
+		.search-box input{position:absolute;top:39px;left:85px;z-index:999;padding:5px;border:0;box-shadow:0 0 10px #777;}
+	</style>
+</head>
+	<body ng-controller="MapCtrl">
+		
+		<div id="panel" class="search-box">
+            <input id="target" type="text" placeholder="Search Box">
+        </div>
+        <div id="map"></div>
+		
+		<div id="my-slider"><ul class="nav">
+			<li ng-repeat="photo in photos" ng-class="{'active':isActive($index)}">
+				<img src="{{ photo.thumbnail }}" ng-click="showPhoto($index);">
+			</li>
+		</ul>
+		<div class = "container slider">
+			 <img ng-repeat="photo in photos" ng-show="isActive($index)" ng-src="{{photo.image}}" />
+		</div>
+		</div>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTc47VXMPbOuU-zv4icUgMEQ0UKQfBlG4"></script>
+		<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=places"></script>
+		<script src="angular.js"></script>
+		<!--<script src="ng-map.min.js"></script>-->
+		<script src="app.js"></script>
+	</body>
+</html>
