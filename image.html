@@ -1,0 +1,86 @@
+<!doctype html>
+<html ng-app="myapp">
+<head>
+	<title>Angular Album</title>
+	<script src="angular.js"></script>
+	<style type="text/css">
+	ul.nav{clear: both;float: left;padding:0;margin:0;}
+	ul.nav li{float:left;list-style:none;padding:5px;border:1px solid #ccc;margin:5px 15px 10px 0;}
+	.nav li.active{border: 5px solid red}
+	.container.slider{clear:both;text-align:center;margin:0 auto;padding:5px;border:1px solid #ccc;}
+		#my-slider{width:45%;float: left;margin:0% 2% 2% 2%;}
+	</style>
+</head>
+
+<body ng-controller="MyController">
+	<button ng-click="login.doClick(item, $event)">Send AJAX Request</button>
+    <br/>
+    Data from server: {{login}}
+    <br />
+
+    <button ng-click="getImageList.doClick(item, $event)">Get Image List</button>
+    <br/>
+    <!--Data from server: {{photos}}-->
+    <br />
+
+	<div id="my-slider">
+		<ul class="nav">
+			<li ng-repeat="photo in photos" ng-class="{'active':isActive($index)}">
+				<img src="{{ photo.thumbImage }}" ng-click="showPhoto($index);">
+			</li>
+		</ul>
+		<div class = "container slider">
+			<img ng-repeat="photo in photos" ng-show="isActive($index)" ng-src="{{photo.largeImage}}" />
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	angular.module("myapp", [])
+		.controller("MyController", function($scope, $http) {
+			$scope.login = {};
+			$scope.photos = {};
+			$scope.getImageList = {};
+
+			$scope.login.doClick = function(item, event) {
+
+                var responsePromise = $http.get("http://localhost/kapsureweb/services/?param=login&login_source=fb&first_name=Anshul&last_name=Gupta&fbid=100008213550306&email=6iosdeveloper@gmail.com&apnstoken=123");
+
+                responsePromise.success(function(data, status, headers, config) {
+                    $scope.login = data.responseData;
+                    $scope.token = $scope.login.session_token;
+                });
+                responsePromise.error(function(data, status, headers, config) {
+                    alert("AJAX failed!");
+                });
+            }
+
+            $scope.getImageList.doClick = function(item, event) {
+
+            	var temp = {headers: {'token': $scope.login.session_token}};
+
+	            var responsePromise = $http.get("http://localhost/kapsureweb/services/?param=getImageList&google_id=e582311e6ec228d524330c0c3e8a047f9f9da201&startDate=11-06-2014&startTime=00:00&endTime=23:59", temp);
+
+	            responsePromise.success(function(data, status, headers, config) {
+	            	$scope.photos = data.responseData;
+	            	$scope._Index = 0;
+
+	            	$scope.isActive = function (index) {
+						return $scope._Index === index;
+					};
+
+					$scope.showPhoto = function (index) {
+						$scope._Index = index;
+					};
+
+	            });
+
+            }
+            
+
+		});
+	</script>
+</body>
+</html>
+
+
+
