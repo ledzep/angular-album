@@ -106,6 +106,8 @@
                                        for(var j in tempGeometry) {
                                         if(j == "location") {
                                             var tempLocation =  tempGeometry[j];
+                                            tempLocation.name = object.name;
+                                            tempLocation.id = object.id;
                                             console.log(tempLocation);
                                             $scope.latlng.push(tempLocation);
                                             for(var k in tempLocation) {
@@ -146,7 +148,7 @@
                             var marker = new google.maps.Marker({
                                 map: $scope.map,
                                 position: new google.maps.LatLng(info.lat, info.lng),
-                                title: info.lat
+                                title: info.name
                             });
                             marker.content = '<div class="infoWindowContent">' + info.lat + ',' + info.lng + '</div>';
 
