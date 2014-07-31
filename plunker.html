@@ -75,7 +75,9 @@
     <br />
     <strong>Data from server: </strong>{{latlng}}
     <br /><br />
-    <!--<strong>Data from server: </strong>{{locationData}}-->  
+    <!--<strong>Data from server: </strong>{{locationData}}-->
+    <select ng-model="GoogleIdObject" ng-options="location.name for location in latlng track by location.id"></select><br />
+    <pre>{{GoogleIdObject}}</pre>  
     <div id="map"></div>
     <div id="class" ng-repeat="marker in markers | orderBy : 'title'">
         <a href="#" ng-click="openInfoWindow($event, marker)">{{marker.title}}</a>
@@ -98,6 +100,7 @@
     var app = angular.module("myapp", []);
 
     app.controller("MyController", function($scope, $http, $log) {
+        $scope.GoogleIdObject = {};
     	$scope.date = '19-05-2014';
         $scope.start_time = "foo";
         $scope.end_time = "bar";
@@ -266,7 +269,7 @@
 
 	    	alert("Date=" + $scope.date);
 
-	        var responsePromise = $http.get("http://localhost/kapsureweb/services/?param=getImageList&google_id=12f5b2917400285f2dadd2e575ece7201787a427&startDate="+$scope.date+"&startTime="+$scope.start_time+"&endTime="+$scope.end_time+"", temp);
+	        var responsePromise = $http.get("http://localhost/kapsureweb/services/?param=getImageList&google_id="+$scope.GoogleIdObject.id+"&startDate="+$scope.date+"&startTime="+$scope.start_time+"&endTime="+$scope.end_time+"", temp);
 
 	        responsePromise.success(function(data, status, headers, config) {
 	        	$scope.photos = data.responseData;
