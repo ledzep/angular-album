@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=&sensor=false&extension=.js"></script>-->
+    <script>document.write('<base href="' + document.location + '" />');</script>
+    <link rel="stylesheet" href="bootstrap-3.2.0-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="jquery-ui.css">
+    <link rel="stylesheet" href="jquery.datetimepicker.css">
+    <script src="jquery.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <script src="jquery.datetimepicker.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTc47VXMPbOuU-zv4icUgMEQ0UKQfBlG4"></script>
+    <script src="angular.js"></script>
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js"></script>
+    <!--<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">-->
+    <style type="text/css">
+        #map {
+            height:420px;
+            width:600px;
+        }
+        .infoWindowContent {
+            font-size:  14px !important;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        h2 {
+            margin-bottom:0;
+            margin-top: 0;
+        }
+
+        ul.nav{clear: both;float: left;padding:0;margin:0;}
+        ul.nav li{float:left;list-style:none;padding:5px;border:1px solid #ccc;margin:5px 15px 10px 0;}
+        .nav li.active{border: 5px solid red}
+        .container.slider{clear:both;text-align:center;margin:0 auto;padding:5px;border:1px solid #ccc;}
+            #my-slider{width:45%;float: left;margin:0% 2% 2% 2%;}
+    </style>
+</head>
+
+<body ng-app="myapp">
+
+  <div ng-controller="MyController" >
+    <button ng-click="login.doClick(item, $event)">Click to Login</button>
+    <br/>
+    <div class="row">
+        <div class="col-xs-3">
+            <p class="input-group">
+              <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="dt" is-open="opened" min-date="minDate" max-date="'2015-06-22'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+        </div>
+    </div>
+
+    <input type="text" ng-model="start_time" stimepicker />
+    <br/><br/>
+    <input type="text" ng-model="end_time" etimepicker />
+    <br/><br/>
+
+    <div id="map"></div><br/><br/>
+
+    <select ng-model="GoogleIdObject" ng-options="location.name for location in latlng track by location.id"></select><br />
+
+    <button ng-click="getImageList.doClick(item, $event)">Get Image List</button><br/><br/>
+
+    <div id="my-slider">
+        <ul class="nav">
+            <li ng-repeat="photo in photos" ng-class="{'active':isActive($index)}">
+                <img src="{{ photo.thumbImage }}" ng-click="showPhoto($index);">
+            </li>
+        </ul>
+        <div class = "container slider">
+            <img ng-repeat="photo in photos" ng-show="isActive($index)" ng-src="{{photo.largeImage}}" />
+        </div>
+    </div>
+
+
+
+  </div>
+
+  <script>
+    var app = angular.module("myapp", ['ui.bootstrap']);
+
+    app.controller("MyController", function($scope, $http, $log) {
+        $scope.GoogleIdObject = {};
+        $scope.start_time = "foo";
+        $scope.end_time = "bar";
+        $scope.login = {};
+        $scope.photos = {};
+        $scope.token = 1234;
+        $scope.locationData = {};
+        $scope.getImageList = {};
+        $scope.cities = [];
+        $scope.locations = {};
+        $scope.latlng = [];
+        
+        $scope.login.doClick = function(item, event) {
+
+            var responsePromise = $http.get("http://192.168.0.115/kapsureweb/services/?param=login&login_source=fb&first_name=Anshul&last_name=Gupta&fbid=100008213550306&email=6iosdeveloper@gmail.com&apnstoken=123");
+
+            responsePromise.success(function(data, status, headers, config) {
+                $scope.login = data.responseData;
+                $scope.token = $scope.login.session_token;
+                var config = {headers: {'token': $scope.login.session_token}};
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var coords = position.coords;
+
+                        var responsePromise = $http.get("http://192.168.0.115/kapsureweb/services/?param=getGoogleLocationListByLatLong&lat="+coords.latitude+"&long="+coords.longitude+"", config);
+
+                        responsePromise.success(function(data, status, headers, config){
+                            $scope.locationData = data.responseData.results;
+                            console.log($scope.locationData.length);
+                            for (var i = 0; i < $scope.locationData.length; i++) {
+                                var object = $scope.locationData[i];
+                                for (var property in object) 
+                                {
+                                    if(property == "geometry") 
+                                    {
+                                       var tempGeometry =  object[property];
+                                       for(var j in tempGeometry) {
+                                        if(j == "location") {
+                                            var tempLocation =  tempGeometry[j];
+                                            tempLocation.name = object.name;
+                                            tempLocation.id = object.id;
+                                            console.log(tempLocation);
+                                            $scope.latlng.push(tempLocation);
+                                            for(var k in tempLocation) {
+                                                console.log('item ' + k + ': ' + k + '=' + tempLocation[k]);
+                                            }
+                                        }
+                                        //console.log('item ' + j + ': ' + j + '=' + tempGeometry[j]);
+                                        }
+                                    }  
+                                    console.log('item ' + i + ': ' + property + '=' + object[property]);
+                                }
+                                // If property names are known beforehand, you can also just do e.g.
+                                // alert(object.id + ',' + object.Title);
+                            }
+
+                            for (var i = 0; i < $scope.latlng.length; i++){
+                                console.log("calling createMarker function")
+                                console.log($scope.latlng[i]);
+                                createMarker($scope.latlng[i]);
+                            }
+                        });
+
+                        var mapOptions = {
+                            zoom: 13,
+                            center: new google.maps.LatLng(coords.latitude, coords.longitude),
+                            mapTypeId: google.maps.MapTypeId.TERRAIN    
+                        }
+
+                        $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+                        $scope.markers = [];
+
+                        var infoWindow = new google.maps.InfoWindow();
+                        
+                        var createMarker = function (info) {
+                            var marker = new google.maps.Marker({
+                                map: $scope.map,
+                                position: new google.maps.LatLng(info.lat, info.lng),
+                                title: info.name
+                            });
+                            marker.content = '<div class="infoWindowContent">' + info.lat + ',' + info.lng + '</div>';
+
+                            google.maps.event.addListener(marker, 'click', function(){
+                                infoWindow.setContent('<h2>' + marker.title + '</h2>' + marker.content);
+                                infoWindow.open($scope.map, marker);
+                            });
+                
+                            console.log(info);
+                            console.log("Adding markers to the LatLng");
+                            console.log(marker);
+                            $scope.markers.push(marker);
+                        }
+
+                    });
+                }
+                //alert("Login Successful");
+            });
+            responsePromise.error(function(data, status, headers, config) {
+                alert("AJAX failed!");
+            });
+        }
+        
+        /*$scope.locationData.doClick = function(item, event) {
+
+            //alert("Token=" + $scope.login.session_token);
+            
+            
+
+            /*var responsePromise = $http.get("http://192.168.0.115/kapsureweb/services/?param=getAllLocationList", config);
+
+            responsePromise.success(function(data, status, headers, config) {
+                $scope.locationData = data.responseData;
+                $scope.cities = $scope.locationData;
+                console.log($scope.cities);
+
+                for (var i = 0; i < $scope.cities.length; i++){
+                    console.log("calling createMarker function")
+                    console.log($scope.cities[i]);
+                    createMarker($scope.cities[i]);
+                }
+            });
+
+            responsePromise.error(function(data, status, headers, config) {
+                alert("AJAX failed! Token=" + $scope.login.session_token);
+            });
+
+            var mapOptions = {
+                zoom: 3,
+                center: new google.maps.LatLng(40.0000, -98.0000),
+                mapTypeId: google.maps.MapTypeId.TERRAIN    
+            }
+
+            $scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            $scope.markers = [];
+
+            var infoWindow = new google.maps.InfoWindow();
+
+            var createMarker = function (city) {
+                    var marker = new google.maps.Marker({
+                        map: $scope.map,
+                        position: new google.maps.LatLng(parseFloat(city.lat), parseFloat(city.long)),
+                        title: city.location_caption
+                    });
+                    marker.content = '<div class="infoWindowContent">' + city.location_type + '</div>';
+    
+                    google.maps.event.addListener(marker, 'click', function(){
+                        infoWindow.setContent('<h2>' + marker.title + '</h2>' + marker.content);
+                        infoWindow.open($scope.map, marker);
+                    });
+                    console.log(city);
+                    console.log("Adding markers to the cities");
+                    console.log(marker);
+                    $scope.markers.push(marker);
+            }
+
+            $scope.openInfoWindow = function(e, selectedMarker){
+                e.preventDefault();
+                google.maps.event.trigger(selectedMarker, 'click');
+            }
+        }*/
+
+        $scope.getImageList.doClick = function(item, event) {
+
+            var temp = {headers: {'token': $scope.login.session_token}};
+
+            alert("Date=" + $scope.dt);
+
+            alert("google_id=" + $scope.GoogleIdObject.id);
+
+            alert("start_time=" + $scope.start_time);
+
+            alert("end_time=" + $scope.end_time);
+
+            var responsePromise = $http.get("http://192.168.0.115/kapsureweb/services/?param=getImageList&google_id="+$scope.GoogleIdObject.id+"&startDate="+$scope.dt+"&startTime="+$scope.start_time+"&endTime="+$scope.end_time+"", temp);
+
+            responsePromise.success(function(data, status, headers, config) {
+                $scope.photos = data.responseData;
+                $scope._Index = 0;
+
+                $scope.isActive = function (index) {
+                    return $scope._Index === index;
+                };
+
+                $scope.showPhoto = function (index) {
+                    $scope._Index = index;
+                };
+            });
+        }
+
+        $scope.today = function() {
+            $scope.dt = new Date();
+        };
+        $scope.today();
+
+        $scope.open = function($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+
+            $scope.opened = true;
+        };
+
+        $scope.dateOptions = {
+            formatYear: 'yy',
+            startingDay: 1
+        };
+
+        $scope.initDate = new Date('2016-15-20');
+        $scope.formats = ['dd-MM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
+        $scope.format = $scope.formats[0];
+    });
+    
+    app.directive('stimepicker', function() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link : function(scope, element, attrs, ngModelCtrl) {
+                $(function(){
+                    element.datetimepicker({
+                        datepicker:false,
+                        format:'H:i',
+                        onSelect:function (start_time) {
+                            ngModelCtrl.$setViewValue(start_time);
+                            scope.$apply();
+                        }
+                    });
+                });
+            }
+        }
+    });
+
+    app.directive('etimepicker', function() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link : function(scope, element, attrs, ngModelCtrl) {
+                $(function(){
+                    element.datetimepicker({
+                        datepicker:false,
+                        format:'H:i',
+                        onSelect:function (end_time) {
+                            ngModelCtrl.$setViewValue(end_time);
+                            scope.$apply();
+                        }
+                    });
+                });
+            }
+        }
+    });
+  </script>
+
+</body>
+</html>
+
+
+
