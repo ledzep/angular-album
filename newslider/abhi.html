@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html ng-app="todos">
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script src="https://code.angularjs.org/1.2.21/angular-sanitize.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.javascript"></script>
+    <script src="dist/ng-slider.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dist/css/ng-slider.min.css">
+</head>
+
+<body ng-controller="TodoController">
+	<div>
+        <input ng-model="value"  type="text" id="mySlider4" slider options="options" />
+        current value: {{value}}<br/>
+    </div>
+
+    <script type="text/javascript">
+
+    var todos = angular.module('todos', ['ngSlider']);
+
+    todos.controller('TodoController', function($scope) {
+
+    	$scope.value = "10;15";
+    	$scope.options = {       
+        	from: 480,
+        	to: 1020,
+        	step: 15,
+        	dimension: '',
+        	scale: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'],
+        	limits: false,
+        	calculate: function( value ){
+           		var hours = Math.floor( value / 60 );
+            	var mins = ( value - hours*60 );
+            	return (hours < 10 ? "0"+hours : hours) + ":" + ( mins == 0 ? "00" : mins );
+        	},
+        	onstatechange: function( value ){
+            	//console.log( this );
+        	}
+    	};
+    });
+    </script>
+</body>
+
