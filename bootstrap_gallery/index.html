@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html ng-app="todos">
+
+  <head>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script src="https://code.angularjs.org/1.2.21/angular-sanitize.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="https://code.angularjs.org/1.2.21/angular-animate.min.js"></script>
+    <script src="http://angular-ui.github.com/bootstrap/ui-bootstrap-tpls-0.11.0.min.js"></script>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTc47VXMPbOuU-zv4icUgMEQ0UKQfBlG4"></script>
+    <link rel="stylesheet" type="text/css" href="dist/css/ng-slider.min.css">
+    <link rel="stylesheet" href="style.css" />
+    <!--<link rel="stylesheet" href="bootstrap.min.css" />-->
+    <script src="dist/ng-slider.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+
+  <body ng-controller="TodoController">
+
+      <div class="row">
+          <div class="col-xs-2">
+              <p class="input-group">
+                <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="dt" is-open="opened" min-date="minDate" max-date="'2015-06-22'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+                <span class="input-group-btn">
+                  <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                </span>
+              </p>
+          </div>
+      </div>
+
+      <div>
+        <input ng-model="value"  type="text" id="mySlider4" slider options="options" />
+        current value: {{value}}<br/>
+      </div>
+
+      <div class="left-box"><div id="map" style="height:290px;"></div>
+      <label>Select Location</label> 
+      <!--<select ng-model="GoogleIdObject" ng-options="location.name for location in latlng track by location.id"></select><br />-->
+
+     <button ng-click="getImageList.doClick(item, $event)">Get Image List</button>
+    
+     <div class="container slider">
+
+        <!-- enumerate all photos -->
+        <img ng-repeat="photo in filteredPhotos" class="slide" ng-swipe-right="showPrev()" ng-swipe-left="showNext()" ng-show="isActive($index)" ng-src="{{photo.largeImage}}" />
+
+        <!-- prev / next controls -->
+        <a class="arrow prev" href="#" ng-click="showPrev()"></a>
+        <a class="arrow next" href="#" ng-click="showNext()"></a>
+
+        <!-- extra navigation controls -->
+        <ul class="nav">
+            <li ng-repeat="photo in filteredPhotos" ng-class="{'active':isActive($index)}">
+                <img src="{{photo.thumbImage}}" alt="{{photo.desc}}" title="{{photo.desc}}" ng-click="showPhoto($index);" />
+            </li>
+        </ul>
+    </div>
+    <br/><br/>
+    <br/>
+    <!--<ul>
+      <li ng-repeat="photo in filteredPhotos">{{photo.thumbImage}}</li>
+    </ul>-->
+    <pager total-items="total" ng-model="currentPage" items-per-page="3" boundary-links="true"></pager>
+  </body>
+</html>
+
+<!--previous-text="&lsaquo;" next-text="&rsaquo;-->
